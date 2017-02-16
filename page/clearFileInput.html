@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Clear File Input</title>
+    <!--注意使用路径是否正确，且不能写成简写形式：<script type="text/javascript" src="../lib/jquery-1.12.4.js"/>-->
+    <script type="text/javascript" src="../lib/jquery-1.12.4.js"></script>
+    <script type="text/javascript">
+
+        /*
+        * 创建file类型的input的同时FileUpload对象也会被创建
+        * FileUpload对象的value属性保存用户指定的文件的名称
+        * value属性是只读的，即不能通过编码（HTML、JavaScript）
+        * 修改其值，因此不能通过value来清空file类型的input
+        * 通过document.getElementById()来获取FileUpload对象
+        * */
+        function clearFileInputError() {
+            var fileUpload = document.getElementById("fileInput");
+            //Chrome下生效，IE8不生效
+            fileUpload.value = "";
+        }
+
+        //利用JavaScript清理file类型的input
+        function clearFileInputByJs() {
+            var fileUpload = document.getElementById("fileInput");
+            //Chrome、IE8...
+            if(fileUpload.outerHTML){
+                fileUpload.outerHTML = fileUpload.outerHTML;
+            }else{//FireFox
+                fileUpload.value = "";
+            }
+        }
+
+        //利用jQuery清理file类型的input
+        function clearFileInputByJQuery() {
+            var fileUpload = $("#fileInput");
+            /*
+            * val("")中的输入参数只能为空字符串，否则会报错：
+            * Failed to set the 'value' property on 'HTMLInputElement':
+            * This input element accepts a filename,
+            * which may only be programmatically set to the empty string.
+            * */
+            fileUpload.after(fileUpload.clone().val(""));
+            fileUpload.remove();
+        }
+
+    </script>
+</head>
+<body>
+    <input type="file" id="fileInput"/>
+    <input type="button" onclick="clearFileInputError()" value="清空（Error）"/>
+    <input type="button" onclick="clearFileInputByJs()" value="清空（Js）"/>
+    <input type="button" onclick="clearFileInputByJQuery()" value="清空（jQuery）"/>
+</body>
+</html>
