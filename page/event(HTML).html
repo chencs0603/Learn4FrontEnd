@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Process</title>
+    <script type="text/javascript">
+
+        /************************************************************************/
+
+        /*
+         * HTML事件处理
+         * 缺点：HTML与JavaScript代码耦合
+         * 可以指定多个事件处理函数，已；隔开
+         * */
+        function btnClickProcess(obj) {
+            var log = document.getElementById("log");
+            //调用时，this指向的是响应事件的DOM对象
+            //只有点击按钮才会触发事件处理，this指向的是按钮
+            addOneLineText(log, obj);
+            //JavaScript程序中this指向的是Window对象（window）
+            addOneLineText(log, this);
+            //在事件目标阶段处理事件
+            addOneLineText(log, "eventPhase:" + event.eventPhase);
+            //添加换行
+            addOneLineText(log, "<br/>");
+        }
+
+        function divClickProcess(obj) {
+            var log = document.getElementById("log");
+            //调用时，this指向的是响应事件的DOM对象
+            //点击DIV或按钮，都会触发事件处理，this均指向DIV
+            addOneLineText(log, obj);
+            //JavaScript程序中this指向的是Window对象（window）
+            addOneLineText(log, this);
+            //在事件冒泡阶段处理事件
+            addOneLineText(log, "eventPhase:" + event.eventPhase);
+            //添加换行
+            addOneLineText(log, "<br/>");
+        }
+
+        /************************************************************************/
+
+        //日志输出函数：向父节点中添加一行文字
+        function addOneLineText(parentNode, text) {
+            var childNode = document.createElement("p");
+            childNode.innerHTML = text;
+            parentNode.appendChild(childNode);
+        }
+
+        //清空日志信息，即刷新网页
+        function clearLog() {
+            history.go(0);
+        }
+
+        /************************************************************************/
+
+    </script>
+</head>
+<body>
+    <h2>HTML事件处理</h2>
+    <div>DIV<input type="button" value="按钮" onclick="btnClickProcess(this)"></div>
+    <br>
+    <div onclick="divClickProcess(this)">DIV<button>按钮</button></div>
+    <br>
+    <input type="button" value="按钮" onclick="btnClickProcess(this);divClickProcess(this)">
+    <br>
+
+    <p>输出日志：</p>
+    <br>
+    <div><input type="button" value="清空" id="clearLog" onclick="clearLog()"></div>
+    <br>
+    <p id="log"></p>
+</body>
+</html>

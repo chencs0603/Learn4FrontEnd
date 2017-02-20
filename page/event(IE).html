@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Process</title>
+</head>
+<body>
+    <h2>IE事件处理</h2>
+    <div><input type="button" value="按钮" id="btnIE"></div>
+    <br>
+
+    <p>输出日志：</p>
+    <br>
+    <div><input type="button" value="清空" id="clearLog" onclick="clearLog()"></div>
+    <br>
+    <p id="log"></p>
+
+    <script type="text/javascript">
+
+        /************************************************************************/
+
+        /*
+         * IE事件处理
+         * 放在body底部才能执行
+         * 绑定事件处理：attachEvent(eventType, handler)；
+         * eventType：事件名，如"click"；
+         * handler:事件处理函数；
+         * 可以绑定多个，并按绑定顺序的相反顺序执行，冒泡阶段执行
+         * 删除事件处理：detachEvent(eventType, handler)；
+         * 匿名添加的函数无法删除
+         * */
+        document.getElementById("btnIE").attachEvent("onclick", handlerIE);
+        function handlerIE() {
+            var log = document.getElementById("log");
+            //this指向的是window,即为全局作用域
+            addOneLineText(log, this);
+            //IE中通过window获取event
+            var event = window.event;
+            //event中的srcElement与DOM中target属性相同
+            addOneLineText(log, "this == event.srcElement:" + (this=== event.srcElement));
+            //添加换行
+            addOneLineText(log, "<br/>");
+        };
+
+        /************************************************************************/
+
+        //日志输出函数：向父节点中添加一行文字
+        function addOneLineText(parentNode, text) {
+            var childNode = document.createElement("p");
+            childNode.innerHTML = text;
+            parentNode.appendChild(childNode);
+        }
+
+        //清空日志信息
+        function clearLog() {
+            history.go(0);
+        }
+        document.getElementById("clearLog").onclick = clearLog;
+
+        /************************************************************************/
+
+    </script>
+</body>
+</html>
