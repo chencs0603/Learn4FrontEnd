@@ -2,18 +2,37 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>IE Compatible</title>
     <!--注意使用路径是否正确，且不能写成简写形式：<script type="text/javascript" src="../lib/jquery-1.12.4.js"/>-->
     <script type="text/javascript" src="../lib/jquery-1.12.4.js"></script>
+    <title>IE Compatible</title>
+
+</head>
+<body>
+    <h2>Clear File Input</h2>
+    <input type="file" id="fileInput"/>
+    <input type="button" onclick="clearFileInputError()" value="清空（Error）"/>
+    <input type="button" onclick="clearFileInputByJs()" value="清空（Js）"/>
+    <input type="button" onclick="clearFileInputByJQuery()" value="清空（jQuery）"/>
+
+    <h2>String.startsWith和String.endsWith</h2>
+    <div><input type="button" id="starts/endsWith" value="starts/endsWith"></div>
+    <br>
+    <p>输出日志：</p>
+    <br>
+    <div><input type="button" value="清空" id="clearLog" onclick="clearLog()"></div>
+    <br>
+    <p id="log"></p>
     <script type="text/javascript">
 
+        /************************************************************************/
+
         /*
-        * 创建file类型的input的同时FileUpload对象也会被创建
-        * FileUpload对象的value属性保存用户指定的文件的名称
-        * value属性是只读的，即不能通过编码（HTML、JavaScript）
-        * 修改其值，因此不能通过value来清空file类型的input
-        * 通过document.getElementById()来获取FileUpload对象
-        * */
+         * 创建file类型的input的同时FileUpload对象也会被创建
+         * FileUpload对象的value属性保存用户指定的文件的名称
+         * value属性是只读的，即不能通过编码（HTML、JavaScript）
+         * 修改其值，因此不能通过value来清空file类型的input
+         * 通过document.getElementById()来获取FileUpload对象
+         * */
         function clearFileInputError() {
             var fileUpload = document.getElementById("fileInput");
             //Chrome下生效，IE8不生效
@@ -35,23 +54,78 @@
         function clearFileInputByJQuery() {
             var fileUpload = $("#fileInput");
             /*
-            * val("")中的输入参数只能为空字符串，否则会报错：
-            * Failed to set the 'value' property on 'HTMLInputElement':
-            * This input element accepts a filename,
-            * which may only be programmatically set to the empty string.
-            * */
+             * val("")中的输入参数只能为空字符串，否则会报错：
+             * Failed to set the 'value' property on 'HTMLInputElement':
+             * This input element accepts a filename,
+             * which may only be programmatically set to the empty string.
+             * */
             fileUpload.after(fileUpload.clone().val(""));
             fileUpload.remove();
         }
 
-    </script>
-</head>
-<body>
-    <h2>Clear File Input</h2>
-    <input type="file" id="fileInput"/>
-    <input type="button" onclick="clearFileInputError()" value="清空（Error）"/>
-    <input type="button" onclick="clearFileInputByJs()" value="清空（Js）"/>
-    <input type="button" onclick="clearFileInputByJQuery()" value="清空（jQuery）"/>
+        /************************************************************************/
+        document.getElementById("starts/endsWith").onclick = startsAndendsWith;
+        function startsAndendsWith() {
+            var log = document.getElementById("log");
+            /*
+             * ES5没有String.startsWith和endsWith接口
+             * chrome上支持，IE上不支持
+             * */
+            addOneLineText(log, "'chencs'.startsWith('ch'):" + "chencs".startsWith("ch"));
+            addOneLineText(log, "'chencs'.startsWith('cs'):" + "chencs".startsWith("cs"));
+            addOneLineText(log, "'chencs'.startsWith('cs'):" + "chencs".endsWith("cs"));
+            addOneLineText(log, "'chencs'.startsWith('ch'):" + "chencs".endsWith("ch"));
+            //添加换行
+            addOneLineText(log, "<br/>");
+        };
 
+        /*
+         * 利用JavaScript自带的接口实现这两个接口
+         * */
+//        if (typeof String.prototype.startsWith != 'function') {
+//            String.prototype.startsWith = function (prefix){
+//                return this.slice(0, prefix.length) === prefix;
+//            };
+//        }
+//        if (typeof String.prototype.endsWith != 'function') {
+//            String.prototype.endsWith = function(suffix) {
+//                return this.indexOf(suffix, this.length - suffix.length) !== -1;
+//            };
+//        }
+
+        /*
+         * 利用正则表达式实现这两个接口
+         * */
+        if (typeof String.prototype.startsWith != 'function') {
+            String.prototype.startsWith=function(prefix){
+                var reg=new RegExp("^"+prefix);
+                return reg.test(this);
+            }
+        }
+        if (typeof String.prototype.endsWith != 'function') {
+            String.prototype.endsWith = function(suffix) {
+                var reg=new RegExp(suffix+"$");
+                return reg.test(this);
+            };
+        }
+
+        /************************************************************************/
+
+        //日志输出函数：向父节点中添加一行文字
+        function addOneLineText(parentNode, text) {
+            var childNode = document.createElement("p");
+            childNode.innerHTML = text;
+            parentNode.appendChild(childNode);
+        }
+
+        //清空日志信息
+        function clearLog() {
+            history.go(0);
+        }
+        document.getElementById("clearLog").onclick = clearLog;
+
+        /************************************************************************/
+
+    </script>
 </body>
 </html>
