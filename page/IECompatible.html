@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Clear File Input</title>
+    <title>IE Compatible</title>
     <!--注意使用路径是否正确，且不能写成简写形式：<script type="text/javascript" src="../lib/jquery-1.12.4.js"/>-->
     <script type="text/javascript" src="../lib/jquery-1.12.4.js"></script>
     <script type="text/javascript">
@@ -47,9 +47,11 @@
     </script>
 </head>
 <body>
+    <h2>Clear File Input</h2>
     <input type="file" id="fileInput"/>
     <input type="button" onclick="clearFileInputError()" value="清空（Error）"/>
     <input type="button" onclick="clearFileInputByJs()" value="清空（Js）"/>
     <input type="button" onclick="clearFileInputByJQuery()" value="清空（jQuery）"/>
+
 </body>
 </html>
