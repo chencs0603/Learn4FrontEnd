@@ -28,8 +28,9 @@
                 }
             }
         }
-
+        //作用于FireFox、Opera浏览器（未测试）
         EventUtil.addHandler(document, "keypress", banBackspace);
+        //作用于IE、Chrome浏览器
         EventUtil.addHandler(document, "keydown", banBackspace);
 
     </script>
