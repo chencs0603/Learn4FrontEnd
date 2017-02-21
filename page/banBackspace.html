@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ban Backspace</title>
+    <script type="text/javascript" src="../js/EventUtil.js"></script>
+    <script type="text/javascript">
+        function banBackspace(event) {
+            //获取事件对象
+            var eventObj = EventUtil.getEvent(event);
+            //获取事件的目标
+            var target = EventUtil.getTarget(eventObj);
+            //获取事件的目标的类型
+            var type = target.type;
+
+            var readOnly = target.getAttribute('readOnly');
+            readOnly = ( "" == readOnly) ? false : readOnly;
+            //按下回退键
+            if(8 == EventUtil.getCharCode(eventObj)){
+                //事件的目标的类型为密码、文本框等，且为readOnly，则回退键失效
+                if(("password" == type || "text" == type || "textarea" == type)
+                        && ("readOnly"== readOnly ? true : false)){
+                    EventUtil.preventDefault(eventObj);
+                }
+                //事件的目标的类型不是密码、文本框等，则回退键失效
+                if("password" != type && "text" != type && "textarea" != type){
+                    EventUtil.preventDefault(eventObj);
+                }
+            }
+        }
+
+        EventUtil.addHandler(document, "keypress", banBackspace);
+        EventUtil.addHandler(document, "keydown", banBackspace);
+
+    </script>
+</head>
+<body>
+    <h2>禁止回退键</h2>
+
+    <input type="button" value="按钮" />
+    <br>
+    <input type="password" />
+    <br>
+    <input type="text" />
+    <br>
+    <input type="text" readonly="true" value="只读，不可编辑" />
+    <br>
+    <textarea>Hello world....This is a text area</textarea>
+</body>
+</html>
