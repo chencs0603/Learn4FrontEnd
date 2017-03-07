@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>prototype</title>
+
+</head>
+<body>
+    <h2>继承</h2>
+    <div><input type="button" value="原型链" id="prototypeChain"></div>
+    <br>
+    <div><input type="button" value="原型链（引用类型）" id="prototypeChain2"></div>
+    <br>
+    <div><input type="button" value="借用构造函数" id="constructorStealing"></div>
+    <br>
+    <div><input type="button" value="组合继承" id="combinationInherit"></div>
+    <br>
+    <div><input type="button" value="原型式继承" id="prototypalInherit"></div>
+    <br>
+    <div><input type="button" value="寄生组合继承" id="parasiticCombinationInherit"></div>
+    <br>
+    <p>输出日志：</p>
+    <br>
+    <div><input type="button" value="清空" id="clearLog" onclick="clearLog()"></div>
+    <br>
+    <p id="log"></p>
+    <script type="text/javascript">
+        /************************************************************************/
+
+        document.getElementById("prototypeChain").onclick = handler1;
+
+        function handler1() {
+            function SuperType() {
+                this.property = true;
+            }
+
+            SuperType.prototype.getSuperValue = function () {
+                return this.property;
+            };
+
+            function SubType() {
+                this.subProperty = false;
+            }
+            //SubType继承SuperType
+            //重写SubType的原型对象，以SuperType的示例替代
+            //即SuperType实例中的所有属性和方法都存在于SubType原型中
+            SubType.prototype = new SuperType();
+
+            // 给原型添加方法一定放在替换原型语句后面
+            //SubType原型上添加方法
+            SubType.prototype.getSubValue = function () {
+                return this.subProperty;
+            };
+            //实际是给SuperType实例添加getSuperValue方法，屏蔽了SuperType原型中的getSuperValue方法
+            SubType.prototype.getSuperValue = function () {
+                return false;
+            };
+
+            var log = document.getElementById("log");
+
+            var subType = new SubType();
+            //SubType的原型是SuperType的实例
+            addOneLineText(log, "SubType.prototype instanceof SuperType:" + (SubType.prototype instanceof SuperType));
+            //SubType的原型的__proto__指向SuperType的原型(SuperType的实例的__proto__指向SuperType的原型)
+            addOneLineText(log, "SubType.prototype.__proto__ == SuperType.prototype:" + (SubType.prototype.__proto__ == SuperType.prototype));
+            //SubType的原型的__proto__的constructor指回到SuperType(SuperType的原型的constructor指回SuperType)
+            addOneLineText(log, "SubType.prototype.__proto__.constructor == SuperType:" + (SubType.prototype.__proto__.constructor == SuperType));
+            //SubType实例的__proto__指向Super的实例(SubType实例的__proto__指向SubType原型)
+            addOneLineText(log, "subType.__proto__ instanceof SuperType:" + (subType.__proto__ instanceof SuperType));
+            //SuperType实例（subType.__proto__）的__proto__指回SuperType原型
+            addOneLineText(log, "subType.__proto__.__proto__ == SuperType.prototype:" + (subType.__proto__.__proto__ == SuperType.prototype));
+            //SuperType实例（subType.__proto__）的__proto__指回SuperType原型
+            addOneLineText(log, "subType.__proto__.__proto__.constructor == SuperType:" + (subType.__proto__.__proto__.constructor == SuperType));
+
+            //所有的引用类型都继承了Objec，即SuperType继承Object，SuperType原型的__proto__指向Object原型
+            addOneLineText(log, "SuperType.prototype.__proto__ == Object.prototype:" + (SuperType.prototype.__proto__ == Object.prototype));
+            //在SubType（subtype）实例中没搜索到，
+            //在SubType.prototype（SuperType实例）中没有搜索到
+            //最后在Super.prototype搜索到getSuperValue方法
+            addOneLineText(log, "subType.getSuperValue():" + (subType.getSuperValue()));
+            //确定原型与实例的关系
+            addOneLineText(log, "subType instanceof  Object:" + (subType instanceof  Object));
+            addOneLineText(log, "subType instanceof  SuperType:" + (subType instanceof  SuperType));
+            addOneLineText(log, "subType instanceof  SubType:" + (subType instanceof  SubType));
+
+            addOneLineText(log, "Object.prototype.isPrototypeOf(subType):" + (Object.prototype.isPrototypeOf(subType)));
+            addOneLineText(log, "SuperType.prototype.isPrototypeOf(subType):" + (SuperType.prototype.isPrototypeOf(subType)));
+            addOneLineText(log, "SubType.prototype.isPrototypeOf(subType):" + (SubType.prototype.isPrototypeOf(subType)));
+
+            addOneLineText(log, "subType.getSuperValue():" + (subType.getSuperValue()));
+
+        }
+
+        /************************************************************************/
+
+        document.getElementById("prototypeChain2").onclick = handler2;
+
+        function handler2() {
+            function SuperType() {
+                //colors属性是数字即为引用类型
+                //当指针类型来理解，指向堆栈中的同一片内存
+                //所以实例均指向同一内存
+                this.colors = ["red", "blue", "green"];
+            }
+
+            function SubType() {
+
+            }
+            //SubType继承SuperType
+            SubType.prototype = new SuperType();
+            subType1.colors.push("black");
+
+            var log = document.getElementById("log");
+
+            var subType1 = new SubType();
+            //向实例subType1中添加black，再另外的实例中也同样反映出来
+            addOneLineText(log, "subType1.colors:" + (subType1.colors));
+
+            var subType2 = new SubType();
+            addOneLineText(log, "subType2.colors:" + (subType2.colors));
+        }
+
+        /************************************************************************/
+
+        document.getElementById("constructorStealing").onclick = handler3;
+
+        function handler3() {
+            function SuperType() {
+                this.colors = ["red", "blue", "green"];
+            }
+
+            SuperType.prototype.getSuperValue = function () {
+                return true;
+            };
+
+            function SubType() {
+                //子类构造函数的内部调用父类构造函数
+                //通过call/apply方法可以在SubType实例环境下调用SuperType构造函数
+                //在新建的SubType实例上执行SuperType构造函数中定义的所有对象初始化
+                //这样SubType的每个实例都具有自己的colors属性的副本
+                SuperType.call(this);
+            }
+
+            var log = document.getElementById("log");
+
+            var subType1 = new SubType();
+            subType1.colors.push("black");
+            addOneLineText(log, "subType1.colors:" + (subType1.colors));
+
+            var subType2 = new SubType();
+            addOneLineText(log, "subType2.colors:" + (subType2.colors));
+
+            //子类只能使用构造函数，无法复用父类原型中的方法，因此subType2.getSuperValue()会报错
+            //addOneLineText(log, "subType2.getSuperValue():" + (subType2.getSuperValue()));
+           }
+
+        /************************************************************************/
+
+        document.getElementById("combinationInherit").onclick = handler4;
+
+        function handler4() {
+            //组合继承避免了原型链和借用构造函数的缺陷，融合了两者的优点
+
+            function SuperType(name) {
+                this.name = name;
+                this.colors = ["red", "blue", "green"];
+            }
+
+            SuperType.prototype.sayName = function () {
+                alert(this.name);
+            };
+
+            function SubType(name, age) {
+                //继承属性
+                SuperType.call(this, name);
+
+                this.age = age;
+            }
+
+            //继承方法
+            SubType.prototype = new SuperType();
+
+            SubType.prototype.sayAge = function () {
+                alert(this.age);
+            };
+
+            var log = document.getElementById("log");
+
+            var subType1 = new SubType("chencs", 28);
+            subType1.colors.push("black");
+            addOneLineText(log, "subType1.colors:" + (subType1.colors));
+            subType1.sayName();
+            subType1.sayAge();
+
+            var subType2 = new SubType("chencs0603", 30);
+            addOneLineText(log, "subType2.colors:" + (subType2.colors));
+            subType2.sayName();
+            subType2.sayAge();
+
+        }
+
+        /************************************************************************/
+
+        document.getElementById("prototypalInherit").onclick = handler5;
+
+        function handler5() {
+            var person = {
+                name: "chencs",
+                friends: ["Shelby", "Court", "Van"]
+            };
+
+            var log = document.getElementById("log");
+
+            addOneLineText(log, "person.name:" + (person.name));
+            addOneLineText(log, "person.friends:" + (person.friends));
+
+            //借助原型，基于已有对象创建新对象，IE9+，chrome支持Object.createf方法
+            var person1 = Object.create(person);
+            person1.name = "Greg";
+            person1.friends.push("Rob");
+
+            addOneLineText(log, "person1.name:" + (person1.name));
+            addOneLineText(log, "person1.friends:" + (person1.friends));
+
+            var person2 = Object.create(person);
+            person2.name = "Linda";
+            person2.friends.push("Barbie");
+
+            addOneLineText(log, "person2.name:" + (person2.name));
+            addOneLineText(log, "person2.friends:" + (person2.friends));
+        }
+
+        /************************************************************************/
+
+        document.getElementById("parasiticCombinationInherit").onclick = handler6;
+
+        function handler6() {
+            function object(obj){
+                function F(){}
+                F.prototype = obj;
+                return new F();
+            }
+
+            function inheritPrototype(subType, superType){
+                var prototype = object(superType.prototype);   //创建对象
+                prototype.constructor = subType;               //增强对象
+                subType.prototype = prototype;                 //指定对象
+            }
+
+            function SuperType(name){
+                this.name = name;
+                this.colors = ["red", "blue", "green"];
+            }
+
+            SuperType.prototype.sayName = function(){
+                alert(this.name);
+            };
+
+            function SubType(name, age){
+                SuperType.call(this, name);
+
+                this.age = age;
+            }
+
+            inheritPrototype(SubType, SuperType);
+
+            SubType.prototype.sayAge = function(){
+                alert(this.age);
+            };
+
+            var log = document.getElementById("log");
+
+            var subType1 = new SubType("Nicholas", 29);
+            subType1.colors.push("black");
+            addOneLineText(log, "subType1.colors:" + (subType1.colors)); //"red,blue,green,black"
+            subType1.sayName();      //"Nicholas";
+            subType1.sayAge();       //29
+
+
+            var subType2 = new SubType("Greg", 27);
+            addOneLineText(log, "subType2.colors:" + (subType2.colors));  //"red,blue,green"
+            subType2.sayName();      //"Greg";
+            subType2.sayAge();       //27
+        }
+
+        /************************************************************************/
+
+        //日志输出函数：向父节点中添加一行文字
+        function addOneLineText(parentNode, text) {
+            var childNode = document.createElement("p");
+            childNode.innerHTML = text;
+            parentNode.appendChild(childNode);
+        }
+
+        //清空日志信息
+        function clearLog() {
+            history.go(0);
+        }
+        document.getElementById("clearLog").onclick = clearLog;
+
+        /************************************************************************/
+    </script>
+</body>
+</html>
