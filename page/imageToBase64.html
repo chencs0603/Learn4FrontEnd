@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IE Compatible</title>
+    <!--注意使用路径是否正确，且不能写成简写形式：<script type="text/javascript" src="../lib/jquery-1.12.4.js"/>-->
+    <script type="text/javascript" src="../lib/jquery-1.12.4.js"></script>
+</head>
+<body>
+<h2>Image To Base64</h2>
+<input type="file" id="fileInput" multiple="multiple"/>
+<input type="button" onclick="imageToBase64()" value="Base64"/>
+<p>Base64：</p>
+<textarea  id="text" cols=200 rows=50>
+
+</textarea>
+<script type="text/javascript">
+
+    /************************************************************************/
+    var result = document.getElementById("text");
+    var fileElement = document.getElementById("fileInput");
+    //判断浏览器是否支持FileReader接口
+    if(typeof FileReader == 'undefined'){
+        result.value = "您的浏览器不支持FileReader接口！";
+        //使选择控件不可操作
+        fileElement.setAttribute("disabled","disabled");
+    }
+    //将图片转换成Base64编码
+    function imageToBase64() {
+        var file = fileElement.files[0];
+        //检验是否为图像文件
+        if(!/image\/\w+/.test(file.type)){
+            result.value = "您选择的文件不是图片文件";
+            return false;
+        }
+        var reader = new FileReader();
+        //将文件以Data URL形式读入页面
+        reader.readAsDataURL(file);
+        reader.onload = function(e){
+            var log = document.getElementById("log");
+            //输出图片文件的base64
+            result.value = this.result;
+        }
+    }
+
+</script>
+</body>
+</html>
