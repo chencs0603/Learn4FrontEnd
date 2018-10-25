@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>prototype</title>
+
+</head>
+<body>
+    <h2>函数表达式</h2>
+    <div><input type="button" value="原型对象" id="prototypeBtn1"></div>
+    <br>
+    <div><input type="button" value="原型对象（简单语法）" id="prototypeBtn2"></div>
+    <br>
+    <div><input type="button" value="原型对象（动态性）" id="prototypeBtn3"></div>
+    <br>
+    <p>输出日志：</p>
+    <br>
+    <div><input type="button" value="清空" id="clearLog" onclick="clearLog()"></div>
+    <br>
+    <p id="log"></p>
+    <script type="text/javascript">
+        /************************************************************************/
+
+        document.getElementById("prototypeBtn1").onclick = handler1;
+
+        function handler1() {
+            function createComparisonFunction(propertyName) {
+                return function (object1, object2) {
+                    var value1 = object1[propertyName];
+                    var value2 = object2[propertyName];
+
+                    if (value1 < value2){
+                        return -1;
+                    }else if (value1 > value2){
+                        return 1;
+                    }else {
+                        return 0;
+                    }
+                };
+            }
+            var log = document.getElementById("log");
+
+            var compareNames = createComparisonFunction("name");
+
+            var result = compareNames({name:"Nicholas"}, {name:"Greg"});
+
+            addOneLineText(log, "result:" + (result));
+            compareNames = null;
+
+        }
+
+        /************************************************************************/
+
+        document.getElementById("prototypeBtn2").onclick = handler2;
+
+        function handler2() {
+            function Person() {
+
+            }
+
+            Person.prototype = {
+//                constructor: Person,
+                name: "chencs",
+                age: 28,
+                job: "Software Engineer",
+                sayName: function () {
+                    alert(this.name);
+                }
+            };
+
+            var friend = new Person();
+
+            var log = document.getElementById("log");
+            //friend是Person的实例，也是Object的实例
+            addOneLineText(log, "friend instanceof Person:" + (friend instanceof Person));
+            addOneLineText(log, "friend instanceof Object:" + (friend instanceof Object));
+            //!!!原型对象的constructor不再指向Person，而是Object
+            // 如果显示指定=constructor为Person（即加上constructor: Person），则原型对象的constructor指向Person
+            addOneLineText(log, "Person.prototype.constructor == Person:" + (Person.prototype.constructor == Person));
+            addOneLineText(log, "friend.__proto__.constructor == Person:" + (friend.__proto__.constructor == Person));
+            addOneLineText(log, "Person.prototype.constructor == Object:" + (Person.prototype.constructor == Object));
+            addOneLineText(log, "friend.__proto__.constructor == Object:" + (friend.__proto__.constructor == Object));
+            //函数和实例均指向同一个原型对象
+            addOneLineText(log, "friend.__proto__ == Person.prototype:" + (friend.__proto__ == Person.prototype));
+        }
+
+        /************************************************************************/
+
+        document.getElementById("prototypeBtn3").onclick = handler3;
+
+        function handler3() {
+            function Person() {
+
+            }
+
+            Person.prototype = {
+//                constructor: Person,
+                name: "chencs",
+                age: 28,
+                job: "Software Engineer",
+                sayName: function () {
+                    alert(this.name);
+                }
+            };
+
+            var friend = new Person();
+
+            var log = document.getElementById("log");
+            //向原型对象添加sayHi方法
+            Person.prototype.sayHi = function () {
+                alert("hi");
+            };
+            //无论friend的定义在添加sayHi方法的前后，都能正常调用sayHi方法
+            //且本质上调用的是原型对象的sayHi方法
+            //可以通过向原型对象中添加属性来函数或实例来添加属性
+            friend.sayHi();
+
+            //原型对象上添加了sayHi属性，但是函数和实例还是指向原来的原型对象
+            addOneLineText(log, "friend.__proto__ == Person.prototype:" + (friend.__proto__ == Person.prototype));
+            //重写原型对象
+            Person.prototype = {
+                greeting: function () {
+                    alert("Good morning");
+                }
+            };
+
+            //重写原型对象后，原型对象的constructor不再指向Person，而是Object
+            addOneLineText(log, "Person.prototype.constructor == Person:" + (Person.prototype.constructor == Person));
+            addOneLineText(log, "friend.__proto__.constructor == Person:" + (friend.__proto__.constructor == Person));
+            addOneLineText(log, "Person.prototype.constructor == Object:" + (Person.prototype.constructor == Object));
+            addOneLineText(log, "friend.__proto__.constructor == Object:" + (friend.__proto__.constructor == Object));
+            //!!!函数和实例指向不同的原型对象，函数(Person)指向重写后的原型对象
+            //函数指向的原型对象会随着重写而发生改变
+            // 实例(friend)指向重写前的原型对象（即定义friend时Person的原型对象）
+            // 实例在定义时其指向的原型对象就已经确定，不再改变
+            addOneLineText(log, "friend.__proto__ == Person.prototype:" + (friend.__proto__ == Person.prototype));
+            //friend及其指向的原型对象没有greeting属性，所以调用这个方法会报错
+//            friend.greeting();
+           }
+
+        /************************************************************************/
+
+        //日志输出函数：向父节点中添加一行文字
+        function addOneLineText(parentNode, text) {
+            var childNode = document.createElement("p");
+            childNode.innerHTML = text;
+            parentNode.appendChild(childNode);
+        }
+
+        //清空日志信息
+        function clearLog() {
+            history.go(0);
+        }
+        document.getElementById("clearLog").onclick = clearLog;
+
+        /************************************************************************/
+    </script>
+</body>
+</html>
